@@ -2,6 +2,7 @@ package br.com.digisystem.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.digisystem.dtos.UsuarioDTO;
 import br.com.digisystem.entities.UsuarioEntity;
 import br.com.digisystem.services.UsuarioService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -28,9 +32,33 @@ public class UsuarioController {
 	private UsuarioService usuarioService;
 
 	@GetMapping
+	@ApiOperation(value = "Listar todos os usuários")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message="Sucesso"),
+			@ApiResponse(code = 400, message="Bad Request"),
+	})
 	public ResponseEntity<List<UsuarioDTO>> getAll() {
 		
 		List<UsuarioEntity> lista = this.usuarioService.getAll();
+		
+		// Converte cada elemento da lista para DTO
+		List<UsuarioDTO> listaDTO = lista.stream().map(x -> x.toDTO())
+				.collect(Collectors.toList());
+				
+		return ResponseEntity.ok().body( listaDTO );
+	}
+
+	@ApiOperation(value = "Buscar usuário pelo Id")
+	@GetMapping("/{id}")
+	public ResponseEntity<UsuarioDTO> getOne(@PathVariable String id) {
+		
+		return ResponseEntity.ok().body(this.usuarioService.getOne(id).toDTO()); 
+	}
+	
+	@GetMapping("/get-by-nome/{nome}")
+	public ResponseEntity<List<UsuarioDTO>> getByNome(@PathVariable String nome){
+		
+		List<UsuarioEntity> lista = this.usuarioService.getByName(nome);
 		
 		List<UsuarioDTO> listaDTO = new ArrayList<>();
 		
@@ -40,25 +68,7 @@ public class UsuarioController {
 		return ResponseEntity.ok().body( listaDTO );
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<UsuarioDTO> getOne(@PathVariable String id) {
-		
-		return ResponseEntity.ok().body(this.usuarioService.getOne(id).toDTO()); 
-	}
-	
-//	@GetMapping("/get-by-nome/{nome}")
-//	public ResponseEntity<List<UsuarioDTO>> getByNome(@PathVariable String nome){
-//		
-//		List<UsuarioEntity> lista = this.usuarioService.getByName(nome);
-//		
-//		List<UsuarioDTO> listaDTO = new ArrayList<>();
-//		
-//		for(int i = 0; i < lista.size(); i++) {
-//			listaDTO.add( lista.get(i).toDTO());
-//		}
-//		return ResponseEntity.ok().body( listaDTO );
-//	}
-
+	@ApiOperation(value = "Adicionar novo usuário")
 	@PostMapping
 	public ResponseEntity<UsuarioDTO> create(@Valid @RequestBody UsuarioDTO usuario) {
 		
@@ -72,6 +82,7 @@ public class UsuarioController {
 		return ResponseEntity.ok().body(usuarioEntitySalvo.toDTO());
 	}
 
+	@ApiOperation(value = "Atualizar usuário")
 	@PatchMapping("/{id}")
 	public ResponseEntity<UsuarioDTO> update(@PathVariable String id,
 			@RequestBody UsuarioDTO usuario) {
@@ -81,20 +92,11 @@ public class UsuarioController {
 		return ResponseEntity.ok().body( usuarioEntitySalvo.toDTO() );
 	}
 	
-//	@PatchMapping("update/{id}")
-//	public ResponseEntity<Void> updateUsuario(@PathVariable int id,
-//			@RequestBody UsuarioDTO dto) {
-//		
-//		this.usuarioService.updateUsuario(id, dto.getNome());
-//		
-//		return ResponseEntity.ok().build();
-//	}
-
+	@ApiOperation(value = "Deletar usuário")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable String id) {
 		this.usuarioService.delete(id);
 		
-		// Retorna um status 200 (OK) mesmo sendo um método Void
 		return ResponseEntity.ok().build();
 	}
 	

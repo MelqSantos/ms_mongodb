@@ -6,11 +6,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import br.com.digisystem.entities.UsuarioEntity;
+import br.com.digisystem.entities.ProfessorEntity;
 
 @Repository
-public interface UsuarioRepository extends MongoRepository<UsuarioEntity, String> {
+public interface ProfessorRepository extends MongoRepository<ProfessorEntity, String>{
 	
 	@Query(" { nome: {$regex: /?0/  }  } ")
-	public List<UsuarioEntity> searchByNomeNativo(String nome); 
+	public List<ProfessorEntity> searchByNomeNativo(String nome); 
 }

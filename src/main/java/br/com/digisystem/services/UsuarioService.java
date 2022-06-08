@@ -17,10 +17,7 @@ public class UsuarioService {
 	private UsuarioRepository usuarioRepository;
 
 	public List<UsuarioEntity> getAll() {
-
-		List<UsuarioEntity> usuarios = this.usuarioRepository.findAll();
-
-		return usuarios;
+		return this.usuarioRepository.findAll();
 	}
 
 	public UsuarioEntity getOne(String id) {
@@ -28,9 +25,9 @@ public class UsuarioService {
 				.orElseThrow( () -> new ObjNotFoundException("Elemento com ID " + id +" não foi localizado"));
 	}
 	
-//	public List<UsuarioEntity> getByName(String nome) {
-//		return this.usuarioRepository.searchByNomeNativo(nome);
-//	}
+	public List<UsuarioEntity> getByName(String nome) {
+		return this.usuarioRepository.searchByNomeNativo(nome);
+	}
 
 	public UsuarioEntity create(UsuarioEntity usuario) {
 
