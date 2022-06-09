@@ -13,4 +13,5 @@ public interface UsuarioRepository extends MongoRepository<UsuarioEntity, String
 	
 	@Query(" { nome: {$regex: /?0/  }  } ")
 	public List<UsuarioEntity> searchByNomeNativo(String nome); 
+	
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.digisystem.entities.UsuarioEntity;
 import br.com.digisystem.exceptions.ObjNotFoundException;
+import br.com.digisystem.repositories.CustomRepository;
 import br.com.digisystem.repositories.UsuarioRepository;
 
 @Service
@@ -15,6 +16,9 @@ public class UsuarioService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	private CustomRepository customRepository;
 
 	public List<UsuarioEntity> getAll() {
 		return this.usuarioRepository.findAll();
@@ -57,10 +61,9 @@ public class UsuarioService {
 		}
 	}
 	
-//	@Transactional // Executa tudo ou desfaz a transação caso dê errado (Segurança)
-//	public void updateUsuario(int id, String nome) {
-//		this.usuarioRepository.updateUsuario(id, nome);
-//	}
+	public UsuarioEntity updateUsuario(String id, String nome) {
+		return this.customRepository.updateUsuario(id, nome);
+	}
 
 	public void delete(String id) {
 		this.usuarioRepository.deleteById(id);

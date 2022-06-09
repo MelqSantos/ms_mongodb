@@ -92,6 +92,15 @@ public class UsuarioController {
 		return ResponseEntity.ok().body( usuarioEntitySalvo.toDTO() );
 	}
 	
+	@PatchMapping("update/{id}")
+	public ResponseEntity<UsuarioDTO> updateUsuario(@PathVariable String id,
+			@RequestBody UsuarioDTO dto) {
+		
+		UsuarioEntity usuario = this.usuarioService.updateUsuario(id, dto.getNome());
+		
+		return ResponseEntity.ok().body(usuario.toDTO());
+	}
+	
 	@ApiOperation(value = "Deletar usuário")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable String id) {
