@@ -1,7 +1,6 @@
 package br.com.digisystem.services;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,18 +46,13 @@ public class UsuarioService {
 
 	public UsuarioEntity update(String id, UsuarioEntity usuario) {
 
-		Optional<UsuarioEntity> usuarioOptional = this.usuarioRepository.findById(id);
-
-		if (usuarioOptional.isPresent()) {
-			UsuarioEntity usuarioupdate = usuarioOptional.get();
+		UsuarioEntity usuarioupdate = this.usuarioRepository.findById(id)
+				.orElseThrow(() -> new ObjNotFoundException("ID" + id + "Não localizado"));
 
 			usuarioupdate.setEmail(usuario.getEmail());
 			usuarioupdate.setNome(usuario.getNome());
 
 			return this.usuarioRepository.save(usuarioupdate);
-		} else {
-			return null;
-		}
 	}
 	
 	public UsuarioEntity updateUsuario(String id, String nome) {
