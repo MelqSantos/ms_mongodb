@@ -2,11 +2,13 @@ package br.com.digisystem.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.digisystem.dtos.UsuarioDTO;
@@ -23,7 +26,9 @@ import br.com.digisystem.services.UsuarioService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -107,6 +112,25 @@ public class UsuarioController {
 		this.usuarioService.delete(id);
 		
 		return ResponseEntity.ok().build();
+	}
+	
+	@GetMapping("/pagination")
+	public ResponseEntity<Page<UsuarioDTO>> getAllPagination(
+			@RequestParam ( name= "page", defaultValue = "0" ) int page,
+			@RequestParam ( name= "limit", defaultValue = "10" ) int limit
+	) {
+		log.info("page = {}, limit = {}", page, limit);
+		
+		Page<UsuarioEntity> paginado = usuarioService.getAllPagination(page, limit);
+		Page<UsuarioDTO> pageDTO = paginado.map(
+				new Function<UsuarioEntity, UsuarioDTO>(){
+					public UsuarioDTO apply(UsuarioEntity entity) {
+						return entity.toDTO();
+					}
+				}
+			);
+		
+		return ResponseEntity.ok().body( pageDTO );
 	}
 	
 }

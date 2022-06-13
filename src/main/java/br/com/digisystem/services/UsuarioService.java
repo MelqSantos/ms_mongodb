@@ -3,13 +3,17 @@ package br.com.digisystem.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import br.com.digisystem.entities.UsuarioEntity;
 import br.com.digisystem.exceptions.ObjNotFoundException;
 import br.com.digisystem.repositories.CustomRepository;
 import br.com.digisystem.repositories.UsuarioRepository;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class UsuarioService {
 
@@ -60,7 +64,18 @@ public class UsuarioService {
 	}
 
 	public void delete(String id) {
-		this.usuarioRepository.deleteById(id);
+		try {
+			this.usuarioRepository.deleteById(id);
+		} catch (Exception e) {
+			log.error("Erro ao deletar usuário com Id : " + id + ". Erro: " + e.getMessage());
+		}
+	}
+	
+	public Page<UsuarioEntity> getAllPagination(int page, int limit){
+		PageRequest pageRequest = PageRequest.of(page, limit);
+		
+		Page<UsuarioEntity> paginado = usuarioRepository.findAll(pageRequest);
+		return paginado;
 	}
 
 }
