@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,23 +22,26 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.digisystem.dtos.UsuarioDTO;
+import br.com.digisystem.entities.UsuarioEntity;
+import br.com.digisystem.repositories.UsuarioRepository;
+import br.com.digisystem.utils.UsuarioUtil;
 
 @ExtendWith(SpringExtension.class)
 @AutoConfigureMockMvc
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UsuarioControllerTests {
+public class UsuarioControllerTests extends UsuarioUtil{
 	
 	@Autowired
 	private MockMvc mockmvc;
 	
-	private static String lastIdUser;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 	
 	// converte String para objetos
 	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Test
-	@Order(3)
 	void getAllTest() throws Exception {
 		ResultActions response =  mockmvc.perform(
 				get("/usuarios")
@@ -58,11 +60,13 @@ public class UsuarioControllerTests {
 	}
 	
 	@Test
-	@Order(2)
 	void getOne() throws Exception {
 		
+		UsuarioEntity entity = saveUsuario( createValidUser() );
+		String id = entity.getId();
+		
 		ResultActions response =  mockmvc.perform(
-				get("/usuarios/" + lastIdUser)
+				get("/usuarios/" + id)
 				.contentType("application/json")
 				);
 		
@@ -71,12 +75,11 @@ public class UsuarioControllerTests {
 		
 		UsuarioDTO usuario = mapper.readValue(resultStr, UsuarioDTO.class);
 		
-		assertThat(usuario.getId()).isEqualTo(lastIdUser);
+		assertThat(usuario.getId()).isEqualTo(id);
 		assertThat( result.getResponse().getStatus() ).isEqualTo( HttpStatus.OK.value() );
 	}
 	
 	@Test
-	@Order(1)
 	void creatTest() throws Exception{
 		// Criar um usuarioDTO para enviar no corpo da requisição
 		
@@ -95,23 +98,23 @@ public class UsuarioControllerTests {
 		String resultStr = result.getResponse().getContentAsString();
 		
 		UsuarioDTO usuarioSalvo = mapper.readValue(resultStr, UsuarioDTO.class);
-		lastIdUser = usuarioSalvo.getId();
 		
 		assertThat(usuarioSalvo.getId()).isNotNull();
 		assertThat( result.getResponse().getStatus() ).isEqualTo( HttpStatus.OK.value() );
 	}
 	
 	@Test
-	@Order(4)
 	void updateTest() throws Exception{
 		
-		UsuarioDTO usuario = new UsuarioDTO();
+		UsuarioEntity entity = saveUsuario( createValidUser() );
+		String id = entity.getId();
 		
+		UsuarioDTO usuario = new UsuarioDTO();
 		usuario.setNome("Melqui JUNIT");
 		usuario.setEmail("junit@gmail.com");
 		
 		ResultActions response =  mockmvc.perform(
-				patch("/usuarios/" + lastIdUser)
+				patch("/usuarios/" + id)
 				.contentType("application/json")
 				.content(mapper.writeValueAsString(usuario))
 				);
@@ -121,17 +124,18 @@ public class UsuarioControllerTests {
 		
 		UsuarioDTO usuarioAlterado = mapper.readValue(resultStr, UsuarioDTO.class);
 		
-		assertThat(usuarioAlterado.getId()).isEqualTo(lastIdUser);
+		assertThat(usuarioAlterado.getId()).isEqualTo(id);
 		assertThat(usuarioAlterado.getNome()).isEqualTo(usuario.getNome());
 		assertThat(usuarioAlterado.getEmail()).isEqualTo(usuario.getEmail());
 		assertThat( result.getResponse().getStatus() ).isEqualTo( HttpStatus.OK.value() );
 	}
 	
 	@Test
-	@Order(7)
 	void deleteTest() throws Exception{
 		
-		String id = lastIdUser;
+		UsuarioEntity entity = saveUsuario( createValidUser() );
+		String id = entity.getId();
+		
 		ResultActions response =  mockmvc.perform(
 				delete("/usuarios/" + id)
 				.contentType("application/json")
@@ -142,13 +146,12 @@ public class UsuarioControllerTests {
 	}
 	
 	@Test
-	@Order(5)
 	void getByNomeTest() throws Exception{
 		
-		String name = "JUNIT";
+		UsuarioEntity entity = saveUsuario( createValidUser() );
 		
 		ResultActions response =  mockmvc.perform(
-				get("/usuarios/get-by-nome/" + name)
+				get("/usuarios/get-by-nome/" + entity.getNome())
 				.contentType("application/json")
 				);
 		
@@ -162,16 +165,16 @@ public class UsuarioControllerTests {
 	}
 	
 	@Test
-	@Order(6)
 	void updateUsuario() throws Exception {
 		
-		String nome = "Melqui Alterado Junit";
+		UsuarioEntity entity = saveUsuario( createValidUser() );
+		String id = entity.getId();
 		
 		UsuarioDTO usuario = new UsuarioDTO();
-		usuario.setNome(nome);
+		usuario.setNome("Melqui Alterado Junit");
 		
 		ResultActions response = mockmvc.perform(
-				patch("/usuarios/update/" + lastIdUser)
+				patch("/usuarios/update/" + id)
 				.contentType("application/json")
 				.content( mapper.writeValueAsString(usuario) )
 		);
@@ -179,5 +182,9 @@ public class UsuarioControllerTests {
 		MvcResult result = response.andReturn();
 		
 		assertThat( result.getResponse().getStatus() ).isEqualTo( HttpStatus.OK.value() );
+	}
+	
+	private UsuarioEntity saveUsuario(UsuarioEntity entity) {
+		return usuarioRepository.save(entity);
 	}
 }
