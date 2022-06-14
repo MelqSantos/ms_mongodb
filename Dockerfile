@@ -22,7 +22,7 @@ EXPOSE 10001
 
 ENTRYPOINT echo JAVA_OPTS=$JAVA_OPTS && java -jar /app/app.jar
 
-# para buildar a imagem
+# para buildar a imagem ( -t é o nome da imagem que será atribuído )
 # docker build -t ms-mongo-image .
 
 # para rodar o container a partir da imagem ms-mongo-image (tag)
